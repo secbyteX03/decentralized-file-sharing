@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <title>Decentralized File Sharing</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #000000 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card h2 {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #000000;
+      }
+
+      .file-input {
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .file-input:hover {
+        border-color: #667eea;
+        background-color: #f7fafc;
+      }
+
+      .file-input.drag-over {
+        border-color: #667eea;
+        background-color: #ebf4ff;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #000000 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        background: #2a69ac;
+        box-shadow: 0 5px 15px rgba(102, 170, 234, 0.4);
+      }
+
+      .btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .status {
+        margin-top: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .status.success {
+        background-color: #c6f6d5;
+        color: #276749;
+        border: 1px solid #9ae6b4;
+      }
+
+      .status.error {
+        background-color: #fed7d7;
+        color: #c53030;
+        border: 1px solid #feb2b2;
+      }
+
+      .status.loading {
+        background-color: #bee3f8;
+        color: #2a69ac;
+        border: 1px solid #90cdf4;
+      }
+
+      .files-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .files-section h2 {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .file-list {
+        display: grid;
+        gap: 15px;
+      }
+
+      .file-item {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .file-item:hover {
+        background: #ebf4ff;
+        border-color: #667eea;
+      }
+
+      .file-item-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .file-name {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.1em;
+      }
+
+      .file-meta {
+        color: #718096;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+
+      .file-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-small {
+        padding: 8px 16px;
+        font-size: 14px;
+        width: auto;
+      }
+
+      .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .card {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><i class="fas fa-globe"></i> Decentralized File Sharing</h1>
+        <p>Secure file storage using IPFS and Blockchain</p>
+      </div>
+
+      <div class="main-content">
+        <!-- Upload Section -->
+        <div class="card">
+          <h2><i class="fas fa-folder"></i> Upload File</h2>
+          <form id="uploadForm">
+            <div class="form-group">
+              <label for="password">Encryption Password:</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter password to encrypt your file"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Select File:</label>
+              <div class="file-input" id="fileInput">
+                <input type="file" id="file" hidden required />
+                <p>Click here or drag & drop your file</p>
+                <p style="font-size: 0.9em; color: #718096; margin-top: 5px">
+                  Max size: 10MB
+                </p>
+              </div>
+            </div>
+
+            <button type="submit" class="btn" id="uploadBtn">
+              <i class="fas fa-upload"></i> Upload to IPFS & Blockchain
+            </button>
+          </form>
+
+          <div id="uploadStatus"></div>
+        </div>
+
+        <!-- Download Section -->
+        <div class="card">
+          <h2><i class="fas fa-download"></i> Download File</h2>
+          <form id="downloadForm">
+            <div class="form-group">
+              <label for="fileId">File ID:</label>
+              <input
+                type="text"
+                id="fileId"
+                placeholder="Enter file ID"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="downloadPassword">Decryption Password:</label>
+              <input
+                type="password"
+                id="downloadPassword"
+                placeholder="Enter password to decrypt the file"
+                required
+              />
+            </div>
+
+            <button type="submit" class="btn" id="downloadBtn">
+              <i class="fas fa-unlock"></i> Download & Decrypt File
+            </button>
+          </form>
+
+          <div id="downloadStatus"></div>
+        </div>
+      </div>
+
+      <!-- Files List Section -->
+      <div class="files-section">
+        <h2><i class="fas fa-list"></i> All Files</h2>
+        <button class="btn" id="refreshBtn" onclick="loadFiles()">
+          <i class="fas fa-sync-alt"></i> Refresh List
+        </button>
+        <div id="filesList" class="file-list"></div>
+      </div>
+    </div>
+
+    <script>
+      // DOM elements
+      const uploadForm = document.getElementById("uploadForm");
+      const downloadForm = document.getElementById("downloadForm");
+      const fileInput = document.getElementById("fileInput");
+      const fileInputElement = document.getElementById("file");
+      const uploadStatus = document.getElementById("uploadStatus");
+      const downloadStatus = document.getElementById("downloadStatus");
+      const filesList = document.getElementById("filesList");
+
+      // File input handling
+      fileInput.addEventListener("click", () => fileInputElement.click());
+
+      fileInput.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        fileInput.classList.add("drag-over");
+      });
+
+      fileInput.addEventListener("dragleave", () => {
+        fileInput.classList.remove("drag-over");
+      });
+
+      fileInput.addEventListener("drop", (e) => {
+        e.preventDefault();
+        fileInput.classList.remove("drag-over");
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          fileInputElement.files = files;
+          updateFileInputDisplay(files[0]);
+        }
+      });
+
+      fileInputElement.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          updateFileInputDisplay(e.target.files[0]);
+        }
+      });
+
+      function updateFileInputDisplay(file) {
+        fileInput.innerHTML = `
+                <p><strong>Selected:</strong> ${file.name}</p>
+                <p style="font-size: 0.9em; color: #718096;">Size: ${(
+                  file.size /
+                  1024 /
+                  1024
+                ).toFixed(2)} MB</p>
+            `;
+      }
+
+      // Upload form handling
+      uploadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        const file = fileInputElement.files[0];
+        const password = document.getElementById("password").value;
+
+        if (!file) {
+          showStatus(uploadStatus, "Please select a file", "error");
+          return;
+        }
+
+        formData.append("file", file);
+        formData.append("password", password);
+
+        const uploadBtn = document.getElementById("uploadBtn");
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<div class="loading-spinner"></div>Uploading...';
+
+        showStatus(uploadStatus, "Encrypting and uploading file...", "loading");
+
+        try {
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showStatus(
+              uploadStatus,
+              `✅ File uploaded successfully! File ID: ${result.fileId}`,
+              "success"
+            );
+            uploadForm.reset();
+            fileInput.innerHTML = `
+                        <p>Click here or drag & drop your file</p>
+                        <p style="font-size: 0.9em; color: #718096; margin-top: 5px;">Max size: 10MB</p>
+                    `;
+            loadFiles(); // Refresh the files list
+          } else {
+            showStatus(
+              uploadStatus,
+              `❌ Upload failed: ${result.error}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showStatus(
+            uploadStatus,
+            `❌ Upload failed: ${error.message}`,
+            "error"
+          );
+        }
+
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = "🚀 Upload to IPFS & Blockchain";
+      });
+
+      // Download form handling
+      downloadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const fileId = document.getElementById("fileId").value;
+        const password = document.getElementById("downloadPassword").value;
+
+        const downloadBtn = document.getElementById("downloadBtn");
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML =
+          '<div class="loading-spinner"></div>Downloading...';
+
+        showStatus(
+          downloadStatus,
+          "Downloading and decrypting file...",
+          "loading"
+        );
+
+        try {
+          const response = await fetch(
+            `/api/file/${fileId}?password=${encodeURIComponent(password)}`
+          );
+          const result = await response.json();
+
+          if (result.success) {
+            // Create download link
+            const byteCharacters = atob(result.fileData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = result.fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showStatus(
+              downloadStatus,
+              `✅ File downloaded successfully: ${result.fileName}`,
+              "success"
+            );
+          } else {
+            showStatus(
+              downloadStatus,
+              `❌ Download failed: ${result.error}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showStatus(
+            downloadStatus,
+            `❌ Download failed: ${error.message}`,
+            "error"
+          );
+        }
+
+        downloadBtn.disabled = false;
+        downloadBtn.innerHTML = "🔓 Download & Decrypt File";
+      });
+
+      // Show status messages
+      function showStatus(element, message, type) {
+        element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        if (type !== "loading") {
+          setTimeout(() => {
+            element.innerHTML = "";
+          }, 5000);
+        }
+      }
+
+      // Load files list
+      async function loadFiles() {
+        filesList.innerHTML =
+          '<div class="status loading"><div class="loading-spinner"></div>Loading files...</div>';
+
+        try {
+          const response = await fetch("/api/files");
+          const result = await response.json();
+
+          if (result.success && result.files.length > 0) {
+            filesList.innerHTML = result.files
+              .map(
+                (file) => `
+                        <div class="file-item">
+                            <div class="file-item-header">
+                                <div class="file-name">${file.fileName}</div>
+                            </div>
+                            <div class="file-meta">
+                                <div>📁 File ID: ${file.id}</div>
+                                <div>📏 Size: ${(
+                                  file.fileSize /
+                                  1024 /
+                                  1024
+                                ).toFixed(2)} MB</div>
+                                <div>📅 Uploaded: ${new Date(
+                                  file.timestamp * 1000
+                                ).toLocaleString()}</div>
+                                <div>👤 Owner: ${file.owner}</div>
+                                <div>🌐 IPFS: ${file.ipfsHash.substring(
+                                  0,
+                                  20
+                                )}...</div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-small" onclick="quickDownload('${
+                                  file.id
+                                }', '${file.fileName}')">
+                                    📥 Quick Download
+                                </button>
+                                <button class="btn btn-small" onclick="copyFileId('${
+                                  file.id
+                                }')">
+                                    📋 Copy ID
+                                </button>
+                            </div>
+                        </div>
+                    `
+              )
+              .join("");
+          } else {
+            filesList.innerHTML = '<div class="status">No files found</div>';
+          }
+        } catch (error) {
+          filesList.innerHTML = `<div class="status error">Failed to load files: ${error.message}</div>`;
+        }
+      }
+
+      // Quick download function
+      async function quickDownload(fileId, fileName) {
+        const password = prompt(`Enter password to decrypt "${fileName}":`);
+        if (!password) return;
+
+        const originalButton = event.target;
+        originalButton.disabled = true;
+        originalButton.innerHTML =
+          '<div class="loading-spinner"></div>Downloading...';
+
+        try {
+          const response = await fetch(
+            `/api/file/${fileId}?password=${encodeURIComponent(password)}`
+          );
+          const result = await response.json();
+
+          if (result.success) {
+            // Create download link
+            const byteCharacters = atob(result.fileData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = result.fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            alert("✅ File downloaded successfully!");
+          } else {
+            alert(`❌ Download failed: ${result.error}`);
+          }
+        } catch (error) {
+          alert(`❌ Download failed: ${error.message}`);
+        }
+
+        originalButton.disabled = false;
+        originalButton.innerHTML = "📥 Quick Download";
+      }
+
+      // Copy file ID to clipboard
+      function copyFileId(fileId) {
+        navigator.clipboard.writeText(fileId).then(() => {
+          alert("File ID copied to clipboard!");
+        });
+      }
+
+      // Load files on page load
+      window.addEventListener("load", () => {
+        loadFiles();
+
+        // Check server status
+        fetch("/api/health")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Server status:", data);
+          })
+          .catch((error) => {
+            console.error("Server connection failed:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
