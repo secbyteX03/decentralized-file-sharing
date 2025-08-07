@@ -3,8 +3,8 @@ import FileUpload from "./components/FileUpload";
 
 function App() {
   return (
-    <div className="App">
-      <h1>File Storage dApp</h1>
+    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
+      <h1>Decentralized File Sharing Platform</h1>
       <FileUpload />
     </div>
   );
