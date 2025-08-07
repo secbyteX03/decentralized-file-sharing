@@ -1,0 +1,12 @@
+node_modules/
+.env
+contract-config.json
+cache/
+artifacts/
+coverage/
+coverage.json
+typechain/
+dist/
+build/
+*.log
+.DS_Store
