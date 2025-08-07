@@ -71,3 +71,9 @@ Visit http://localhost:3000 and start sharing files!
 ## License
 
 MIT License
+
+---
+
+## 📚 More Documentation
+
+- 📥 [Complete Installation & Troubleshooting Guide](docs/INSTALLATION.md)
